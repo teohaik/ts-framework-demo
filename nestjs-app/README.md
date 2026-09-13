@@ -3,9 +3,15 @@
 A minimal fullstack shape: Nest serves both a JSON API and a static frontend
 from one process (`ServeStaticModule`), no separate build step for the client.
 
+Runs on the **Fastify** HTTP adapter (`@nestjs/platform-fastify`) rather than
+Nest's default Express adapter — same Nest application code
+(`@Module`/`@Controller`/`@Injectable`), swappable HTTP layer underneath. That
+also makes this app a good side-by-side with `fastify-app`: same underlying
+server, very different amount of structure imposed on top of it.
+
 ```
 src/
-  main.ts                    # bootstraps the Nest application
+  main.ts                    # bootstraps the Nest application on the Fastify adapter
   app.module.ts               # root module: imports DatabaseModule + TodosModule + ServeStaticModule
   database/
     database.module.ts        # @Global module exporting the DATABASE_CONNECTION provider
@@ -34,6 +40,10 @@ data/
 - Persistence: `node:sqlite` (Node's built-in driver, still flagged
   experimental as of this Node version, but no npm dependency and no native
   build step)
+- e2e tests (`test/app.e2e-spec.ts`) construct the app with `new FastifyAdapter()`
+  explicitly and call `.ready()` on the underlying Fastify instance before
+  supertest issues requests — Fastify defers route registration until ready,
+  unlike Express.
 
 ```
 npm install
